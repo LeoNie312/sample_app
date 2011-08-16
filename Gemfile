@@ -35,6 +35,7 @@ group :development do
 end
 
 group :test do 
+	gem "spork"
 	gem 'rspec', '>= 2.0.0.rc'
 	gem 'webrat', '0.7.1'
 end

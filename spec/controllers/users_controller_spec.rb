@@ -81,7 +81,10 @@ describe UsersController do
       get :show, :id => @user
       response.should have_selector("h1", :content => @user.name)
     end
-
+    
+    #even though the requirement is described functionally, 
+    #however, the test method explicitly requires to use 
+    #'gravatar'
     it "should have a profile image" do
       get :show, :id => @user
       response.should have_selector("h1>img", :class => "gravatar")
@@ -261,6 +264,57 @@ describe UsersController do
   end
   
   
+  
+  
+  describe "DELETE 'destroy'" do
+
+    before(:each) do
+      @user = Factory(:user,:admin=>false)
+    end
+
+    describe "as a non-signed-in user" do
+      it "should deny access" do
+        delete :destroy, :id => @user
+        response.should redirect_to(signin_path)
+      end
+    end
+
+    describe "as a non-admin user" do
+      it "should protect the page" do
+        test_sign_in(@user)
+        delete :destroy, :id => @user
+        response.should redirect_to(root_path)
+      end
+    end
+
+    describe "as an admin user" do
+
+      before(:each) do
+        @admin = Factory(:user, :email => "admin@example.com", :admin => true)
+        test_sign_in(@admin)
+      end
+
+      it "should destroy non-admin user" do
+        lambda do
+          delete :destroy, :id => @user
+        end.should change(User, :count).by(-1)
+        @user.should_not be_admin
+      end
+      
+      it "should not destroy admin user" do
+        lambda do
+          delete :destroy, :id => @admin
+        end.should_not change(User,:count)
+      end
+
+      it "should redirect to the users page" do
+        delete :destroy, :id => @user
+        response.should redirect_to(users_path)
+      end
+    end
+  end
+  
+  
   describe "authentication of edit/update pages" do
 
     before(:each) do
@@ -299,46 +353,63 @@ describe UsersController do
     end
   end
   
+
   
-  describe "DELETE 'destroy'" do
-
-    before(:each) do
-      @user = Factory(:user)
+    
+    
+    # this part is for the exercise
+    describe "denial of new/create pages for signed-in users" do
+      
+      describe "in 'new' action" do
+      
+        before(:each) do
+          @user = Factory(:user)
+          test_sign_in(@user)
+        end
+      
+        it "should redirect to root path" do
+          get :new
+          response.should redirect_to(root_path)
+        end
+      
+        # it "should have a notice flash message" do
+        #   get :new
+        #   flash[:notice].should =~ /more\s+than\s+one\s+user/
+        # end
+      
+      end
+      
+      describe "in 'create' action" do
+      
+        before(:each) do
+          @user = Factory(:user)
+          test_sign_in(@user)
+          @attr = { :name => @user.name, :email => @user.email,
+                    :password => @user.password, 
+                    :password_confirmation => @user.password_confirmation }
+        end
+      
+        it "should redirect to root path" do
+          post :create, :user => @attr
+          response.should redirect_to(root_path)
+        end
+      
+        # it "should have a notice flash message" do
+        #   post :create, :user => @attr
+        #   flash[:notice].should =~ /more\s+than\s+one\s+user/
+        # end
+        
+        it "should not create a new user" do
+          lambda do 
+            post :create, :user => @attr
+          end.should_not change(User, :count)
+        end
+      end
+  
     end
+    # this part is for the exercise
+    
+  
 
-    describe "as a non-signed-in user" do
-      it "should deny access" do
-        delete :destroy, :id => @user
-        response.should redirect_to(signin_path)
-      end
-    end
-
-    describe "as a non-admin user" do
-      it "should protect the page" do
-        test_sign_in(@user)
-        delete :destroy, :id => @user
-        response.should redirect_to(root_path)
-      end
-    end
-
-    describe "as an admin user" do
-
-      before(:each) do
-        admin = Factory(:user, :email => "admin@example.com", :admin => true)
-        test_sign_in(admin)
-      end
-
-      it "should destroy the user" do
-        lambda do
-          delete :destroy, :id => @user
-        end.should change(User, :count).by(-1)
-      end
-
-      it "should redirect to the users page" do
-        delete :destroy, :id => @user
-        response.should redirect_to(users_path)
-      end
-    end
-  end
   
 end

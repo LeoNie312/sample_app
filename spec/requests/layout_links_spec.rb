@@ -47,16 +47,22 @@ describe "LayoutLinks" do
       response.should have_selector("a", :href => signin_path,
                                          :content => "Sign in")
     end
+    
+    #for fun
+    it "should not have a signout link" do
+      visit root_path
+      response.should_not have_selector("a", :href => signout_path,
+                                             :content => "Sign out")
+    end
+    #for fun
+    
   end
 
   describe "when signed in" do
 
     before(:each) do
       @user = Factory(:user)
-      visit signin_path
-      fill_in :email,    :with => @user.email
-      fill_in :password, :with => @user.password
-      click_button
+      integration_sign_in @user
     end
 
     it "should have a signout link" do
@@ -70,5 +76,30 @@ describe "LayoutLinks" do
       response.should have_selector("a", :href => user_path(@user),
                                          :content => "Profile")
     end
+    
+    
+    #this part is for exercise
+    describe "when non-admin users" do
+      #by default the admin status is false, no need to
+      #change anything
+      
+      it "should not have 'delete' shown on the page" do
+        visit users_path
+        response.should_not have_selector('a', :content=>'delete')
+      end
+    end
+        
+    describe "when admin users" do
+      
+      it "should have 'delete' shown on the page" do
+        @user.toggle!(:admin)
+        visit users_path
+        response.should have_selector('a', :content=>'delete')
+      end
+    end
+    #this part is for exercise
+    
+    
   end
+  
 end

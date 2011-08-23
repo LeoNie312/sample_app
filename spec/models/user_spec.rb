@@ -105,6 +105,9 @@ describe User do
           @user.encrypted_password.should_not be_blank
     end
 
+    #'has_password' method is used to make sure,
+    #there is a way to test the matching with a 
+    #secured password
     describe "has_password? method" do
     
       it "should be true if the passwords match" do
@@ -117,6 +120,7 @@ describe User do
           
     end
     
+    #this method makes sure authentication functionality
     describe "authenticate method" do
 
       it "should return nil on email/password mismatch" do

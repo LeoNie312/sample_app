@@ -22,13 +22,20 @@ describe PagesController do
     # this part is for fun
     describe "for signed-in user" do
       before(:each) do
-        test_sign_in(Factory(:user))
+        @user = Factory(:user)
+        @micropost = Factory(:micropost, :user=>@user)
+        test_sign_in(@user)
       end
       
-      it "should have @feed_items variable" # do
-      #         get :home
-      #         controller.feed_items.should_not be_nil
-      #       end
+      it "should have proper micropost count" do
+        get :home
+        response.should have_selector("span.microposts",:content=>"1 micropost")
+        Factory(:micropost, :user=>@user)
+        get :home
+        response.should have_selector("span.microposts",
+                                         :content=>"microposts")
+      end
+
     end
     # this part is for fun
     

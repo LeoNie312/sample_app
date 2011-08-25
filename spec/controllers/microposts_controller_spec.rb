@@ -37,7 +37,9 @@ describe MicropostsController do
       it "should render the home page" do
         post :create, :micropost => @attr
         response.should render_template('pages/home')
+        # assigns[:feed_items].should_not be_nil
       end
+      
     end
 
     describe "success" do

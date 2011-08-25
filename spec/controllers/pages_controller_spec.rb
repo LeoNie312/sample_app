@@ -18,6 +18,20 @@ describe PagesController do
       response.should have_selector("title",
                         :content => "#{@base_title} | Home")
     end
+    
+    # this part is for fun
+    describe "for signed-in user" do
+      before(:each) do
+        test_sign_in(Factory(:user))
+      end
+      
+      it "should have @feed_items variable" # do
+      #         get :home
+      #         controller.feed_items.should_not be_nil
+      #       end
+    end
+    # this part is for fun
+    
   end
 
   describe "GET 'contact'" do
